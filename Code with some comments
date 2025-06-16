@@ -1,0 +1,84 @@
+# Import the VEX library to access robot hardware and functionalities
+import vex
+
+# Create a brain object to interface with the robot's brain (the main controller)
+brain = vex.Brain()
+
+# Create motor objects for the left and right wheels
+# The left motor is connected to PORT1 and spins in the default direction (forward)
+leftMotor = vex.Motor(vex.PORT1, vex.GEARSET_18, False)  
+
+# The right motor is connected to PORT2 and spins in the reverse direction to allow for proper turning
+rightMotor = vex.Motor(vex.PORT2, vex.GEARSET_18, True)   
+
+# Create a distance sensor object to detect obstacles
+# The distance sensor is connected to PORT3
+distanceSensor = vex.Distance(vex.PORT3)  
+
+# Function to move the robot forward
+def moveForward():
+    """
+    This function spins both the left and right motors forward,
+    allowing the robot to move in a straight line.
+    """
+    leftMotor.spin(vex.FORWARD)  # Spin the left motor forward
+    rightMotor.spin(vex.FORWARD)  # Spin the right motor forward
+
+# Function to stop the robot
+def stopRobot():
+    """
+    This function stops both motors, bringing the robot to a halt.
+    """
+    leftMotor.stop()  # Stop the left motor
+    rightMotor.stop()  # Stop the right motor
+
+# Function to turn the robot to the right
+def turnRight():
+    """
+    This function spins the left motor forward and the right motor in reverse,
+    causing the robot to turn right.
+    """
+    leftMotor.spin(vex.FORWARD)  # Spin the left motor forward
+    rightMotor.spin(vex.REVERSE)  # Spin the right motor in reverse
+
+# Function to turn the robot to the left
+def turnLeft():
+    """
+    This function spins the left motor in reverse and the right motor forward,
+    causing the robot to turn left.
+    """
+    leftMotor.spin(vex.REVERSE)  # Spin the left motor in reverse
+    rightMotor.spin(vex.FORWARD)  # Spin the right motor forward
+
+# Main function that controls the robot's behavior
+def main():
+    """
+    The main function initializes the robot's operation.
+    It continuously checks for obstacles and navigates accordingly.
+    """
+    # Print a message to the brain's screen to indicate the robot is starting
+    brain.screen.print("Mobility Assistant Robot Starting...")
+
+    # Infinite loop to keep the robot running and responsive
+    while True:
+        moveForward()  # Call the function to move the robot forward
+
+        # Check the distance sensor for obstacles
+        # If an object is detected within 300 mm, the robot will respond
+        if distanceSensor.objectDistance(vex.MM) < 300:  # Check if the distance is less than 300 mm
+            stopRobot()  # Stop the robot to avoid collision
+            brain.screen.print("Obstacle detected!")  # Print a message to the screen for feedback
+
+            # Turn right to avoid the obstacle
+            turnRight()  # Call the function to turn right
+            vex.sleep(1000)  # Turn for 1 second (1000 milliseconds)
+            stopRobot()  # Stop turning after the duration
+
+            # Wait for a moment before moving forward again
+            vex.sleep(1000)  # Wait for 1 second to ensure the robot is clear of the obstacle
+
+        # Small delay to prevent overwhelming the CPU with constant checks
+        vex.sleep(20)  # Wait for 20 milliseconds before the next iteration of the loop
+
+# Run the main function to start the robot's operation
+main()
